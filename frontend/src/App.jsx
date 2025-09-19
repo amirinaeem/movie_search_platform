@@ -3,6 +3,9 @@ import SearchBar from './components/SearchBar.jsx';
 import MovieList from './components/MovieList.jsx';
 import AddUserForm from './components/AddUserForm.jsx';
 
+// 🔗 Direct backend API URL
+const API_BASE = "https://movie-search-backend.onrender.com/api";
+
 const bannerStyle = {
   background: '#e8f5e9',
   border: '1px solid #a5d6a7',
@@ -16,22 +19,20 @@ export default function App() {
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [banner, setBanner] = useState(''); // success banner after Add User
+  const [banner, setBanner] = useState('');
 
-  // initial load: 20 movies
+  // Load initial 20 movies
   useEffect(() => {
-    (async () => {
-      await loadInitial();
-    })();
+    loadInitial();
   }, []);
 
   async function loadInitial() {
     try {
       setLoading(true);
       setError('');
-      const res = await fetch(`/api/movies?limit=20&sort=year&order=desc`);
+      const res = await fetch(`${API_BASE}/movies?limit=20&sort=year&order=desc`);
       if (!res.ok) throw new Error('Failed to load movies');
-      const data = await res.json(); // {items,total,page,limit}
+      const data = await res.json(); // { items, total, page, limit }
       setMovies(data.items || []);
     } catch (err) {
       setError(err.message);
@@ -40,13 +41,13 @@ export default function App() {
     }
   }
 
-  // search by title (partial)
+  // Search by title
   async function handleSearch(query) {
     setBanner('');
     setLoading(true);
     setError('');
     try {
-      const res = await fetch(`/api/movies/search?title=${encodeURIComponent(query)}`);
+      const res = await fetch(`${API_BASE}/movies/search?title=${encodeURIComponent(query)}`);
       if (!res.ok) {
         const err = await res.json();
         throw new Error(err.error || 'Search failed');
@@ -60,7 +61,7 @@ export default function App() {
     }
   }
 
-  // after user added: show banner, scroll to top, reload initial list
+  // After user added
   async function handleUserAdded() {
     setBanner('User added successfully!');
     window.scrollTo({ top: 0, behavior: 'smooth' });
