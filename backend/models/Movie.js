@@ -1,32 +1,25 @@
+/**
+ * Movie.js
+ * Movie schema (sample_mflix + TMDB enrichment).
+ */
 const mongoose = require('mongoose');
 
-/**
- * Movie schema (MongoDB sample_mflix + TMDB enrichment)
- */
-const movieSchema = new mongoose.Schema(
-  {
-    title: { type: String, required: true },
-    year: Number,
-
-    directors: [String],
-    cast: [String],
-    genres: [String],
-
-    imdb: {
-      rating: Number,
-      votes: Number,
-      id: Number,
-    },
-
-    metacritic: Number,
-    available_on: String,
-
-    // ✅ TMDB extras
-    overview: String,
-    poster: String,       // full image URL from TMDB
-    tmdb_id: Number,      // TMDB’s unique movie ID
+const movieSchema = new mongoose.Schema({
+  title: { type: String, required: true },
+  year: Number,
+  directors: [String],
+  cast: [String],
+  genres: [String],
+  imdb: {
+    rating: Number,
+    votes: Number,
+    id: Number,
   },
-  { collection: 'movies' }
-);
+  metacritic: Number,
+  available_on: String,
+  overview: String,
+  poster: String,   // full TMDB URL or /noposter.jpg
+  tmdb_id: Number,
+}, { collection: 'movies', timestamps: true });
 
 module.exports = mongoose.model('Movie', movieSchema);
