@@ -4,7 +4,12 @@ import MovieList from './components/MovieList.jsx';
 import AddUserForm from './components/AddUserForm.jsx';
 
 // 🔗 Direct backend API URL
-const API_BASE = "https://movie-search-platform.onrender.com/api";
+// App.jsx
+const API_BASE =
+  import.meta.env.MODE === "development"
+    ? "http://localhost:5000/api"   // backend dev server
+    : "https://movie-search-platform.onrender.com/api"; // production
+
 
 const bannerStyle = {
   background: '#e8f5e9',
@@ -43,23 +48,24 @@ export default function App() {
 
   // Search by title
   async function handleSearch(query) {
-    setBanner('');
-    setLoading(true);
-    setError('');
-    try {
-      const res = await fetch(`${API_BASE}/movies/search?title=${encodeURIComponent(query)}`);
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || 'Search failed');
-      }
-      const data = await res.json(); // array
-      setMovies(data);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
+  setBanner('');
+  setLoading(true);
+  setError('');
+  try {
+    const res = await fetch(`${API_BASE}/tmdb/search?title=${encodeURIComponent(query)}`);
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error || 'Search failed');
     }
+    const data = await res.json(); // array
+    setMovies(data);
+  } catch (err) {
+    setError(err.message);
+  } finally {
+    setLoading(false);
   }
+}
+
 
   // After user added
   async function handleUserAdded() {
