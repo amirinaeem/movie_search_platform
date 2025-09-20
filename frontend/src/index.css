@@ -1,0 +1,16 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Optional: a subtle background gradient */
+body {
+  @apply bg-gradient-to-br from-slate-50 to-slate-100 text-slate-900;
+}
+
+/* 2-line clamp utility for overviews (no plugin) */
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;  
+  overflow: hidden;
+}

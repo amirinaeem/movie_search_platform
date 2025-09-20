@@ -1,74 +1,47 @@
-/**
- * MovieCard.jsx
- * Poster + details, add-to-collection (if signed in).
- */
-import React, { useContext } from 'react';
-import { AuthContext } from '../context/AuthContext';
-
-const API_BASE = import.meta.env.MODE === 'development'
-  ? 'http://localhost:5000/api'
-  : 'https://movie-search-platform.onrender.com/api';
-
-export default function MovieCard({ movie, onRemoved }) {
-  const { token } = useContext(AuthContext);
-
+export default function MovieCard({ movie, onAddToCollection }) {
   const posterUrl =
-    movie.poster && movie.poster !== 'null'
-      ? movie.poster
-      : movie.poster_path
-      ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
-      : '/noposter.jpg';
+    (movie.poster && movie.poster !== "null" && movie.poster) ||
+    (movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : "/noposter.jpg");
 
   const rating =
-    movie.vote_average != null
-      ? Number(movie.vote_average).toFixed(1)
-      : movie.imdb?.rating != null
+    movie?.vote_average != null
+      ? movie.vote_average.toFixed(1)
+      : movie?.imdb?.rating != null
       ? Number(movie.imdb.rating).toFixed(1)
       : null;
 
-  const release = movie.release_date || (movie.year ? String(movie.year) : '');
-
-  async function addToCollection() {
-    if (!token) return alert('Please sign in first');
-    const payload = {
-      movie: {
-        tmdb_id: String(movie.tmdb_id ?? movie.id ?? ''),
-        title: movie.title,
-        year: movie.year ?? (movie.release_date ? Number(movie.release_date.split('-')[0]) : null),
-        poster: posterUrl,
-        overview: movie.overview || '',
-        rating: rating ? Number(rating) : 0,
-      }
-    };
-    const res = await fetch(`${API_BASE}/collections/add`, {
-      method:'POST',
-      headers:{ 'Content-Type':'application/json', Authorization:`Bearer ${token}` },
-      body: JSON.stringify(payload),
-    });
-    if (!res.ok) return alert('Failed to add');
-    alert('Added to your collection!');
-  }
+  const release = movie.release_date || (movie.year ? String(movie.year) : "-");
 
   return (
-    <div style={{ border:'1px solid #ddd', borderRadius:8, overflow:'hidden', background:'#fff', display:'flex', flexDirection:'column' }}>
-      <img src={posterUrl} alt={movie.title} style={{ width:'100%', height:300, objectFit:'cover' }} />
-      <div style={{ padding:'1rem' }}>
-        <h3 style={{ margin:'0 0 0.5rem' }}>{movie.title}</h3>
-        {release && <p style={{ margin:'0.2rem 0' }}><strong>Release:</strong> {release}</p>}
-        {rating &&  <p style={{ margin:'0.2rem 0' }}><strong>Rating:</strong> ⭐ {rating}/10</p>}
-        {movie.genres?.length > 0 && (
-          <p style={{ margin:'0.2rem 0' }}><strong>Genres:</strong> {movie.genres.join(', ')}</p>
+    <div className="bg-white rounded-2xl overflow-hidden shadow hover:shadow-glow transition transform hover:-translate-y-0.5">
+      <div className="relative">
+        <img
+          src={posterUrl}
+          alt={movie.title}
+          className="w-full h-80 object-cover bg-slate-200"
+          loading="lazy"
+        />
+        {rating && (
+          <div className="absolute top-2 right-2 bg-yellow-500 text-white text-xs font-bold px-2 py-1 rounded">
+            ⭐ {rating}
+          </div>
         )}
+      </div>
+
+      <div className="p-4">
+        <h3 className="text-lg font-semibold mb-1 line-clamp-1">{movie.title}</h3>
+        <p className="text-sm text-slate-600 mb-2">📅 {release}</p>
         {movie.overview && (
-          <p style={{ marginTop:'0.5rem', fontSize:'0.9rem', lineHeight:1.4 }}>
-            {movie.overview.length > 180 ? movie.overview.slice(0,180)+'…' : movie.overview}
-          </p>
+          <p className="text-sm text-slate-700 line-clamp-3">{movie.overview}</p>
         )}
-        {token && !onRemoved && (
-          <button onClick={addToCollection} style={{ marginTop:8 }}>+ Add to Collection</button>
-        )}
-        {onRemoved && (
-          <button onClick={()=>onRemoved(movie.tmdb_id)} style={{ marginTop:8, color:'crimson' }}>Remove</button>
+
+        {onAddToCollection && (
+          <button
+            onClick={() => onAddToCollection(movie)}
+            className="mt-3 w-full h-10 rounded-lg bg-slate-900 text-white hover:bg-slate-800"
+          >
+            + Add to Collection
+          </button>
         )}
       </div>
     </div>

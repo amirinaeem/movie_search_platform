@@ -1,18 +1,22 @@
-/**
- * MovieList.jsx
- * Responsive grid of MovieCard(s). Supports optional onRemoved for Profile page.
- */
-import React from 'react';
-import MovieCard from './MovieCard.jsx';
+import MovieCard from "./MovieCard";
 
-export default function MovieList({ movies, onRemoved }) {
+export default function MovieList({ movies, onAddToCollection }) {
   if (!movies || movies.length === 0) {
-    return <p style={{ textAlign:'center', marginTop:'2rem', color:'#666' }}>No movies found. Try another search 🎬</p>;
+    return (
+      <p className="text-center text-slate-600 mt-10">
+        No movies found. Try another search 🎬
+      </p>
+    );
   }
+
   return (
-    <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(220px, 1fr))', gap:'1.25rem', marginTop:'1rem' }}>
-      {movies.map(m => (
-        <MovieCard key={m.tmdb_id || m._id || m.title} movie={m} onRemoved={onRemoved} />
+    <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 mt-6">
+      {movies.map((m) => (
+        <MovieCard
+          key={m.tmdb_id || m._id || m.id || m.title}
+          movie={m}
+          onAddToCollection={onAddToCollection}
+        />
       ))}
     </div>
   );
