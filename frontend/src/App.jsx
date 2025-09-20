@@ -4,7 +4,7 @@ import MovieList from './components/MovieList.jsx';
 import AddUserForm from './components/AddUserForm.jsx';
 
 // 🔗 Direct backend API URL
-const API_BASE = "https://movie-search-backend.onrender.com/api";
+const API_BASE = "https://movie-search-platform.onrender.com/api";
 
 const bannerStyle = {
   background: '#e8f5e9',
