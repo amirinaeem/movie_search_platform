@@ -3,9 +3,28 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Movie Search Platform</title>
+    <title>WATERFLIX.COM</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/jpg" href="/noposter.jpg" />
+
+    <style>
+      .logo {
+        width: 80px;         /* adjust size */
+        height: 80px;
+        border-radius: 50%;  /* makes it circular */
+        object-fit: cover;   /* keep aspect ratio */
+        border: 2px solid #4f46e5; /* optional Indigo border */
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2); /* optional shadow */
+        display: block;
+        margin: 1rem auto;   /* center it */
+      }
+    </style>
   </head>
   <body>
+    <!-- Round Logo -->
+    <img src="/noposter.jpg" alt="Waterflix Logo" class="logo" />
+
+    <!-- React root -->
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
