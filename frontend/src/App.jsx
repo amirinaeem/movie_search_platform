@@ -1,32 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import SearchBar from './components/SearchBar.jsx';
 import MovieList from './components/MovieList.jsx';
+import FilterBar from './components/FilterBar.jsx';
 
-
-// 🔗 Direct backend API URL
-// App.jsx
 const API_BASE =
   import.meta.env.MODE === "development"
-    ? "http://localhost:5000/api"   // backend dev server
-    : "https://movie-search-platform.onrender.com/api"; // production
-
-
-const bannerStyle = {
-  background: '#e8f5e9',
-  border: '1px solid #a5d6a7',
-  color: '#1b5e20',
-  padding: '0.6rem 0.9rem',
-  borderRadius: '6px',
-  marginBottom: '1rem'
-};
+    ? "http://localhost:5000/api"
+    : "https://movie-search-platform.onrender.com/api";
 
 export default function App() {
   const [movies, setMovies] = useState([]);
+  const [filteredMovies, setFilteredMovies] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [banner, setBanner] = useState('');
 
-  // Load initial 20 movies
   useEffect(() => {
     loadInitial();
   }, []);
@@ -34,11 +21,10 @@ export default function App() {
   async function loadInitial() {
     try {
       setLoading(true);
-      setError('');
       const res = await fetch(`${API_BASE}/movies?limit=20&sort=year&order=desc`);
-      if (!res.ok) throw new Error('Failed to load movies');
-      const data = await res.json(); // { items, total, page, limit }
+      const data = await res.json();
       setMovies(data.items || []);
+      setFilteredMovies(data.items || []);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -46,48 +32,52 @@ export default function App() {
     }
   }
 
-  // Search by title
   async function handleSearch(query) {
-  setBanner('');
-  setLoading(true);
-  setError('');
-  try {
-    const res = await fetch(`${API_BASE}/tmdb/search?title=${encodeURIComponent(query)}`);
-    if (!res.ok) {
-      const err = await res.json();
-      throw new Error(err.error || 'Search failed');
+    setLoading(true);
+    setError('');
+    try {
+      const res = await fetch(`${API_BASE}/tmdb/search?title=${encodeURIComponent(query)}`);
+      const data = await res.json();
+      setMovies(data);
+      setFilteredMovies(data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
-    const data = await res.json(); // array
-    setMovies(data);
-  } catch (err) {
-    setError(err.message);
-  } finally {
-    setLoading(false);
   }
-}
 
+  function handleFilterChange(field, order) {
+    const sorted = [...movies].sort((a, b) => {
+      let aVal, bVal;
 
+      if (field === 'title') {
+        aVal = a.title?.toLowerCase() || '';
+        bVal = b.title?.toLowerCase() || '';
+      } else if (field === 'year') {
+        aVal = a.year || 0;
+        bVal = b.year || 0;
+      } else if (field === 'rating') {
+        aVal = a.imdb?.rating || 0;
+        bVal = b.imdb?.rating || 0;
+      }
+
+      if (aVal < bVal) return order === 'asc' ? -1 : 1;
+      if (aVal > bVal) return order === 'asc' ? 1 : -1;
+      return 0;
+    });
+
+    setFilteredMovies(sorted);
+  }
 
   return (
-    <div style={{ maxWidth: 960, margin: '0 auto', padding: '1.25rem', fontFamily: 'Inter, Arial, sans-serif' }}>
-      <header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
-        <h1 style={{ margin: 0, fontSize: '1.75rem' }}>🎬 Movie Search Platform</h1>
-        <small style={{ opacity: 0.7 }}>sample_mflix</small>
-      </header>
-
-      {banner && <div style={bannerStyle}>{banner}</div>}
-
-      <section style={{ background: '#fff', border: '1px solid #eee', borderRadius: 10, padding: '1rem', marginBottom: '1rem' }}>
-        <SearchBar onSearch={handleSearch} />
-        {loading && <p>Loading…</p>}
-        {error && <p style={{ color: 'crimson' }}>{error}</p>}
-        <MovieList movies={movies} />
-      </section>
-
-      
-      <footer style={{ textAlign: 'center', opacity: 0.6, marginTop: '1rem' }}>
-        <small>Powered by MongoDB Atlas sample_mflix</small>
-      </footer>
+    <div style={{ maxWidth: 960, margin: '0 auto', padding: '1.25rem' }}>
+      <h1>🎬 Movie Search Platform</h1>
+      <SearchBar onSearch={handleSearch} />
+      <FilterBar onFilterChange={handleFilterChange} />
+      {loading && <p>Loading…</p>}
+      {error && <p style={{ color: 'crimson' }}>{error}</p>}
+      <MovieList movies={filteredMovies} />
     </div>
   );
 }
