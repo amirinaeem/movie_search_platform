@@ -13,7 +13,7 @@ app.use(cors());
 app.use(express.json());
 
 // Routers
-const tmdbRouter = require('./routes/tmdb');
+const { router: tmdbRouter, seedDefaultMovies } = require('./routes/tmdb');
 const usersRouter = require('./routes/users');
 const moviesRouter = require('./routes/movies');
 const commentsRouter = require('./routes/comments');
@@ -60,10 +60,15 @@ mongoose
   .then(async () => {
     console.log(`✅ Connected to MongoDB: ${mongoose.connection.name}`);
 
+    // 🚀 Start server
     app.listen(PORT, () => {
       console.log(`🚀 Server running at http://localhost:${PORT}`);
     });
 
+    // 🌱 Seed if empty
+    await seedDefaultMovies();
+
+    // Debug info
     const collections = await mongoose.connection.db.listCollections().toArray();
     console.log('Collections:', collections.map((c) => c.name));
 

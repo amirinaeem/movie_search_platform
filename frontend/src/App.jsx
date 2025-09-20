@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import SearchBar from './components/SearchBar.jsx';
 import MovieList from './components/MovieList.jsx';
-import AddUserForm from './components/AddUserForm.jsx';
+
 
 // 🔗 Direct backend API URL
 // App.jsx
@@ -67,13 +67,6 @@ export default function App() {
 }
 
 
-  // After user added
-  async function handleUserAdded() {
-    setBanner('User added successfully!');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    await loadInitial();
-    setTimeout(() => setBanner(''), 3500);
-  }
 
   return (
     <div style={{ maxWidth: 960, margin: '0 auto', padding: '1.25rem', fontFamily: 'Inter, Arial, sans-serif' }}>
@@ -91,10 +84,7 @@ export default function App() {
         <MovieList movies={movies} />
       </section>
 
-      <section style={{ background: '#fff', border: '1px solid #eee', borderRadius: 10, padding: '1rem' }}>
-        <AddUserForm onSuccess={handleUserAdded} />
-      </section>
-
+      
       <footer style={{ textAlign: 'center', opacity: 0.6, marginTop: '1rem' }}>
         <small>Powered by MongoDB Atlas sample_mflix</small>
       </footer>

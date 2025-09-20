@@ -1,4 +1,4 @@
-import React from 'react';
+
 import MovieCard from './MovieCard.jsx';
 
 /**
@@ -24,7 +24,10 @@ const MovieList = ({ movies }) => {
       }}
     >
       {movies.map((movie) => (
-        <MovieCard key={movie.id || movie._id || movie.title} movie={movie} />
+        <MovieCard
+          key={movie.tmdb_id || movie._id} // ✅ stable unique key
+          movie={movie}
+        />
       ))}
     </div>
   );

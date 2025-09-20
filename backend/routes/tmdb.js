@@ -10,13 +10,16 @@ const router = express.Router();
 const TMDB_API_KEY = process.env.TMDB_API_KEY;
 const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
 
+// 🔹 Poster builder with local fallback
 const buildPosterUrl = (path) =>
   path && path !== 'null'
     ? `https://image.tmdb.org/t/p/w500${path}`
     : '/noposter.jpg';
 
-
-// 🔹 Seed 20 movies if DB is empty
+/**
+ * 🔹 Seed 20 default movies into MongoDB (if empty).
+ * Runs once at startup.
+ */
 async function seedDefaultMovies() {
   const count = await Movie.countDocuments();
   if (count > 0) {
@@ -26,7 +29,9 @@ async function seedDefaultMovies() {
 
   console.log('🌱 Seeding 20 default movies from TMDB...');
   try {
-    const tmdbRes = await fetch(`${TMDB_BASE_URL}/movie/popular?api_key=${TMDB_API_KEY}&page=1`);
+    const tmdbRes = await fetch(
+      `${TMDB_BASE_URL}/movie/popular?api_key=${TMDB_API_KEY}&page=1`
+    );
     const data = await tmdbRes.json();
 
     if (!data.results) {
@@ -51,18 +56,25 @@ async function seedDefaultMovies() {
   }
 }
 
-// Call seeding on startup
+// 👉 Call seeding on import
 seedDefaultMovies();
 
-// 🔹 Search route
+/**
+ * 🔹 GET /api/tmdb/search?title=Inception
+ * Fetch search results from TMDB (DO NOT save to DB).
+ */
 router.get('/search', async (req, res) => {
   try {
     const { title } = req.query;
-    if (!title) return res.status(400).json({ error: 'title query parameter is required' });
+    if (!title) {
+      return res.status(400).json({ error: 'title query parameter is required' });
+    }
 
     console.log('🔍 Searching TMDB for:', title);
     const tmdbRes = await fetch(
-      `${TMDB_BASE_URL}/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(title)}`
+      `${TMDB_BASE_URL}/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(
+        title
+      )}`
     );
     const tmdbData = await tmdbRes.json();
 
@@ -77,18 +89,15 @@ router.get('/search', async (req, res) => {
         tmdb_id: m.id,
       }));
 
-      await Movie.insertMany(formatted, { ordered: false }).catch(() => {});
-      return res.json(formatted);
+      return res.json(formatted); // ✅ Only return fresh results
     }
 
-    // fallback: MongoDB search
-    const regex = new RegExp(title, 'i');
-    const mongoMovies = await Movie.find({ title: regex }).limit(20);
-    res.json(mongoMovies);
+    res.json([]); // nothing found
   } catch (err) {
     console.error('❌ Search failed:', err);
     res.status(500).json({ error: 'Search failed' });
   }
 });
 
-module.exports = router;
+
+module.exports = { router, seedDefaultMovies };
